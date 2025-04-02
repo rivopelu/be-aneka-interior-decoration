@@ -6,7 +6,10 @@
     "build": "tsc",
     "start": "tsc && node dist/index.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
-    "lint": "eslint 'src/**/*.ts'"
+    "lint": "eslint 'src/**/*.ts'",
+    "drizzle:generate": "npx drizzle-kit generate",
+    "drizzle:migrate": "npx drizzle-kit migrate"
+
   },
   "keywords": [],
   "author": "",
@@ -17,6 +20,7 @@
     "@types/express": "^5.0.1",
     "@types/node": "^22.13.17",
     "dotenv": "^16.4.7",
+    "drizzle-kit": "^0.30.6",
     "eslint": "^9.23.0",
     "express": "^5.1.0",
     "install": "^0.13.0",
@@ -27,6 +31,9 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "cors": "^2.8.5"
+    "@libsql/client": "^0.15.2",
+    "cors": "^2.8.5",
+    "drizzle-orm": "^0.41.0",
+    "mysql2": "^3.14.0"
   }
 }
