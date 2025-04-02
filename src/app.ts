@@ -1,21 +1,24 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import { errorHandler } from './middlewares/errorHandler';
 import { AppConfig } from './configs/config';
+import { PingRoutes } from './routes/PingRoutes';
 
 const app: Application = express();
 
-app.use(express.json());
+function setupMiddleware() {
+  app.use(express.json());
+  app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+  });
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    errorHandler(err, req, res, next);
+  });
+}
 
-app.use((req, res, next) => {
-  console.log(`Incoming request: ${req.method} ${req.url}`);
-  next();
-});
-
-app.get('/', async (req: Request, res: Response) => {
-  res.status(200).send('OK');
-});
-
-app.use(errorHandler);
+function setupRoutes() {
+  app.use(PingRoutes);
+}
 
 function setupServer(): void {
   const port = AppConfig.port;
@@ -25,5 +28,7 @@ function setupServer(): void {
 }
 
 export function server() {
+  setupMiddleware();
+  setupRoutes();
   setupServer();
 }
