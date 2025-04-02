@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/database';
-import { eq } from 'drizzle-orm';
+import { desc, eq, like } from 'drizzle-orm';
 import { account } from '../entities/account';
 import { UnauthorizedError } from '../utils/error';
 import { IUser } from '../types/type/IAuthUser';
@@ -24,6 +24,51 @@ export class AccountController {
         name: user.name,
       };
       res.data(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async listAccount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { page = 0, size = 10, name = '' } = req.query;
+
+      const offset = Number(page) * Number(size); // Offset starts at 0 for page 0
+      const limit = Number(size);
+
+      // Using a single query to fetch both paginated accounts and the total count
+      const accountsQuery = db
+        .select()
+        .from(account)
+        .where(like(account.name, `%${name}%`)) // Like filter for name
+        .offset(offset)
+        .limit(limit)
+        .orderBy(desc(account.createdDate)); // Order by createdDate in descending order
+
+      const totalCountQuery = db
+        .select()
+        .from(account)
+        .where(like(account.name, `%${name}%`));
+
+      const [accounts, totalRecords] = await Promise.all([
+        accountsQuery,
+        totalCountQuery,
+      ]);
+
+      const totalData = totalRecords.length;
+      const response: IUser[] = accounts.map((user) => ({
+        id: user.id,
+        email: user.email,
+        role: user.role as ACCOUNT_ROLE_ENUM,
+        name: user.name,
+      }));
+
+      res.paginated(response, {
+        total_data: totalData,
+        page_count: Math.ceil(totalData / limit),
+        size: limit,
+        page: Number(page),
+      });
     } catch (error) {
       next(error);
     }
