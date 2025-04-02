@@ -1,15 +1,15 @@
 {
   "name": "aid-backend",
   "version": "1.0.0",
-  "type": "module",
-  "main": "src/index.ts",
+  "type": "commonjs",
+  "main": "dist/app.js",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/app.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/app.ts",
+    "start": "tsc && node --trace-warnings dist/app.js",
+    "dev": "nodemon --watch 'src/**/*.ts'  --exec 'ts-node' src/app.ts",
     "lint": "eslint 'src/**/*.ts'",
-    "drizzle:generate": "npx drizzle-kit generate",
-    "drizzle:migrate": "npx drizzle-kit migrate"
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx drizzle-kit migrate"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +36,7 @@
     "cors": "^2.8.5",
     "drizzle-orm": "^0.41.0",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.14.0"
+    "mysql2": "^3.14.0",
+    "uuid": "^11.1.0"
   }
 }

@@ -7,19 +7,6 @@ import { AuthRoutes } from './routes/auth.routes';
 
 const app: Application = express();
 
-function setupMiddleware() {
-  app.use(responseEnhancer);
-  app.disable('etag');
-  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    errorHandler(err, req, res, next);
-  });
-  app.use(express.json());
-  app.use((req, res, next) => {
-    console.log(`Incoming request: ${req.method} ${req.url}`);
-    next();
-  });
-}
-
 function setupRoutes() {
   app.use(PingRoutes);
   app.use('/auth', AuthRoutes);
@@ -32,10 +19,20 @@ function setupServer(): void {
   });
 }
 
+function setupMiddlewares() {
+  app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+  });
+  app.use(responseEnhancer);
+  app.use(express.json());
+}
+
 export function server() {
   setupServer();
-  setupMiddleware();
+  setupMiddlewares();
   setupRoutes();
+  app.use(errorHandler);
 }
 
 server();

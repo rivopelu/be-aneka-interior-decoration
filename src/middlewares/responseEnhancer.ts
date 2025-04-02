@@ -1,6 +1,6 @@
 // src/middleware/responseEnhancer.ts
 import { Request, Response, NextFunction } from 'express';
-import { ResponseHelper } from '../helper/ResponseHelper.js';
+import { ResponseHelper } from '../helper/ResponseHelper';
 
 declare global {
   namespace Express {
