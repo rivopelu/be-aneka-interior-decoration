@@ -2,19 +2,41 @@ import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/database';
 import { desc, eq, like } from 'drizzle-orm';
 import { account } from '../entities/account';
-import { UnauthorizedError } from '../utils/error';
+import { NotFoundError, UnauthorizedError } from '../utils/error';
 import { IUser } from '../types/type/IAuthUser';
 import { ACCOUNT_ROLE_ENUM } from '../enums/account-role-enum';
 
 export class AccountController {
   static async assignAdmin(req: Request, res: Response, next: NextFunction) {
     try {
-      res.success(req.params.id);
+      const userId = req.params.id;
+
+      const user = await db
+        .select()
+        .from(account)
+        .where(eq(account.id, userId));
+
+      if (!user.length) {
+        throw new NotFoundError('Account does not exist');
+      }
+
+      const currentRole = user[0].role;
+
+      const newRole =
+        currentRole === ACCOUNT_ROLE_ENUM.ADMIN
+          ? ACCOUNT_ROLE_ENUM.USER
+          : ACCOUNT_ROLE_ENUM.ADMIN;
+
+      await db
+        .update(account)
+        .set({ role: newRole })
+        .where(eq(account.id, userId));
+
+      res.success(`User role changed from ${currentRole} to ${newRole}`);
     } catch (err) {
       next(err);
     }
   }
-
   static async getMe(req: Request, res: Response, next: NextFunction) {
     try {
       const findAccount = await db
