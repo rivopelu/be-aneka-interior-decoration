@@ -32,6 +32,8 @@ export class AuthController {
       }
       const verifyUser: IUser = {
         name: user.name,
+        created_by: user.createdBy,
+        created_date: user.createdDate,
         email: user.email,
         role: user.role as ACCOUNT_ROLE_ENUM,
         id: user.id,

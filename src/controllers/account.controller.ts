@@ -7,6 +7,14 @@ import { IUser } from '../types/type/IAuthUser';
 import { ACCOUNT_ROLE_ENUM } from '../enums/account-role-enum';
 
 export class AccountController {
+  static async assignAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.success(req.params.id);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async getMe(req: Request, res: Response, next: NextFunction) {
     try {
       const findAccount = await db
@@ -20,6 +28,8 @@ export class AccountController {
       const response: IUser = {
         id: user.id,
         email: user.email,
+        created_date: user.createdDate,
+        created_by: user.createdBy,
         role: user.role as ACCOUNT_ROLE_ENUM,
         name: user.name,
       };
@@ -58,6 +68,8 @@ export class AccountController {
       const totalData = totalRecords.length;
       const response: IUser[] = accounts.map((user) => ({
         id: user.id,
+        created_date: user.createdDate,
+        created_by: user.createdBy,
         email: user.email,
         role: user.role as ACCOUNT_ROLE_ENUM,
         name: user.name,

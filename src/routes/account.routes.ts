@@ -6,5 +6,10 @@ const router = Router();
 
 router.get('/v1/me', verifyToken, AccountController.getMe);
 router.get('/v1/list', verifyToken, AccountController.listAccount);
+router.patch(
+  '/v1/assign-admin/:id',
+  verifyToken,
+  AccountController.assignAdmin,
+);
 
 export const accountRoutes = router;
