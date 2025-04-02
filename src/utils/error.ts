@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from '../constants/HttpStatus';
+import { HTTP_STATUS } from '../constants/HttpStatus.js';
 
 export class HttpError extends Error {
   constructor(

@@ -1,5 +1,5 @@
 // src/middleware/errorHandler.ts
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { HttpError } from '../utils/error';
 
 export function errorHandler(

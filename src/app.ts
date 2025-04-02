@@ -1,8 +1,9 @@
 import express, { Application, NextFunction, Request, Response } from 'express';
 import { errorHandler } from './middlewares/errorHandler';
 import { AppConfig } from './configs/config';
-import { PingRoutes } from './routes/PingRoutes';
+import { PingRoutes } from './routes/ping.routes';
 import { responseEnhancer } from './middlewares/responseEnhancer';
+import { AuthRoutes } from './routes/auth.routes';
 
 const app: Application = express();
 
@@ -21,6 +22,7 @@ function setupMiddleware() {
 
 function setupRoutes() {
   app.use(PingRoutes);
+  app.use('/auth', AuthRoutes);
 }
 
 function setupServer(): void {
@@ -35,3 +37,5 @@ export function server() {
   setupMiddleware();
   setupRoutes();
 }
+
+server();
