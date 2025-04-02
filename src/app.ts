@@ -5,11 +5,14 @@ import { PingRoutes } from './routes/ping.routes';
 import { responseEnhancer } from './middlewares/responseEnhancer';
 import { AuthRoutes } from './routes/auth.routes';
 import { accountRoutes } from './routes/account.routes';
+import multer from 'multer';
+import { uploadRoutes } from './routes/upload.routes';
 
 const app: Application = express();
 
 function setupRoutes() {
   app.use(PingRoutes);
+  app.use(uploadRoutes);
   app.use('/auth', AuthRoutes);
   app.use('/account', accountRoutes);
 }
