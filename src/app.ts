@@ -12,7 +12,6 @@ app.use((req, res, next) => {
 });
 
 app.get('/', async (req: Request, res: Response) => {
-  console.log('masuk');
   res.status(200).send('OK');
 });
 
