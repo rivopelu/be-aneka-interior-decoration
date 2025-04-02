@@ -1,27 +1,5 @@
-// src/middleware/responseEnhancer.ts
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { ResponseHelper } from '../helper/ResponseHelper';
-
-declare global {
-  namespace Express {
-    interface Response {
-      success(message: string, statusCode?: number): Response;
-      data<T>(data: T, statusCode?: number): Response;
-      paginated<T>(
-        response_data: T,
-        paginated_data: {
-          total_data: number;
-          page_count: number;
-          size: number;
-          page: number;
-        },
-        statusCode?: number,
-        message?: string,
-      ): Response;
-      error(message: string, statusCode?: number): Response;
-    }
-  }
-}
 
 export const responseEnhancer = (
   req: Request,

@@ -1,19 +1,23 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { UnauthorizedError } from '../utils/error';
-import { AuthRequest, IUser } from '../types/type/IAuthUser';
+import { IUser } from '../types/type/IAuthUser';
+import { ENV } from '../constants/env';
 
-const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const token = req.headers['authorization'];
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
+const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new UnauthorizedError('No token provided or invalid format');
   }
 
-  jwt.verify(token, 'secret', (err, decoded) => {
+  const token = authHeader.split(' ')[1];
+
+  jwt.verify(token, ENV.JWT_SECRET, (err, decoded) => {
     if (err) {
-      throw new UnauthorizedError('Unauthorized');
+      return next(new UnauthorizedError('Unauthorized'));
     }
-    req.user = decoded as IUser;
+
+    req.user = decoded as IUser; // Ensure req.user is typed correctly
     next();
   });
 };

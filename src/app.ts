@@ -1,15 +1,17 @@
-import express, { Application, NextFunction, Request, Response } from 'express';
+import express, { Application } from 'express';
 import { errorHandler } from './middlewares/errorHandler';
 import { AppConfig } from './configs/config';
 import { PingRoutes } from './routes/ping.routes';
 import { responseEnhancer } from './middlewares/responseEnhancer';
 import { AuthRoutes } from './routes/auth.routes';
+import { accountRoutes } from './routes/account.routes';
 
 const app: Application = express();
 
 function setupRoutes() {
   app.use(PingRoutes);
   app.use('/auth', AuthRoutes);
+  app.use('/account', accountRoutes);
 }
 
 function setupServer(): void {
