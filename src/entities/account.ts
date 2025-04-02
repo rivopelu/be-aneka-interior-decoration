@@ -9,6 +9,7 @@ export const account = table('account', {
   name: t.varchar('name', { length: 256 }).notNull(),
   email: t.varchar({ length: 256 }).notNull().unique(),
   password: t.text().notNull(),
+  profilePicture: t.text('profile picture'),
   role: t
     .mysqlEnum([ACCOUNT_ROLE_ENUM.USER, ACCOUNT_ROLE_ENUM.ADMIN])
     .default(ACCOUNT_ROLE_ENUM.USER),
