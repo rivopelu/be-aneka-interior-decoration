@@ -1,10 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import { ResponseHelper } from '../helper/ResponseHelper';
+import { NotFoundError } from '../utils/error';
 
 export class PingController {
   static ping(_: Request, res: Response, next: NextFunction) {
     try {
-      res.json(ResponseHelper.success('Pong'));
+      res.paginated([], {
+        size: 12,
+        page: 12,
+        total_data: 12,
+        page_count: 12,
+      });
     } catch (error) {
       console.error(error);
       next(error);
@@ -13,7 +18,7 @@ export class PingController {
 
   static notFound(_: Request, res: Response, next: NextFunction) {
     try {
-      res.json(ResponseHelper.success('Resource Not Found'));
+      throw new NotFoundError('Not Found');
     } catch (err) {
       next(err);
     }

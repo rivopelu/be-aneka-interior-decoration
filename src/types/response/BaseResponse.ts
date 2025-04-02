@@ -1,11 +1,11 @@
 export interface BaseResponse<T> {
   success: boolean;
   message: string;
-  data?: T;
-  pagination?: {
-    total: number;
+  response_data?: T;
+  paginated_data?: {
     page: number;
-    pageSize: number;
-    totalPages: number;
+    size: number;
+    total_data: number;
+    page_count: number;
   };
 }
