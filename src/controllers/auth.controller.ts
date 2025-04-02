@@ -7,15 +7,13 @@ import { BadRequestError } from '../utils/error';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../constants/env';
+import { IResSIgnIn } from '../types/response/IResSIgnIn';
 
 export class AuthController {
   static async signIn(request: Request, res: Response, next: NextFunction) {
     try {
       const findAccount = await db
-        .select({
-          email: account.email,
-          password: account.password, // Explicitly selecting only required fields
-        })
+        .select()
         .from(account)
         .where(eq(account.email, request.body.email));
       if (findAccount.length === 0) {
@@ -31,7 +29,16 @@ export class AuthController {
         throw new BadRequestError('Sign in failed');
       }
       const token = jwt.sign({ email: user.email }, ENV.JWT_SECRET);
-      res.data({ access_token: token });
+      const response: IResSIgnIn = {
+        access_token: token,
+        user_data: {
+          profile_picture: user.profilePicture,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      };
+      res.data(response);
     } catch (error) {
       next(error);
     }
