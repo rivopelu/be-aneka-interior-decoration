@@ -15,6 +15,13 @@
       "when": 1743604286636,
       "tag": "0001_flaky_violations",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1743609795152,
+      "tag": "0002_lazy_stark_industries",
+      "breakpoints": true
     }
   ]
 }
