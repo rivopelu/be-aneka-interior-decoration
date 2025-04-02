@@ -2,7 +2,7 @@ import { HTTP_STATUS } from '../constants/HttpStatus';
 
 export class HttpError extends Error {
   constructor(
-    public statusCode: number,
+    public status: number,
     message: string,
   ) {
     super(message);
