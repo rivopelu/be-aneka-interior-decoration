@@ -1,11 +1,11 @@
 {
   "name": "aid-backend",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/app.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' index.ts",
+    "start": "tsc && node dist/index.js",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "lint": "eslint 'src/**/*.ts'"
   },
   "keywords": [],
