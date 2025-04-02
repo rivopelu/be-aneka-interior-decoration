@@ -8,6 +8,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../constants/env';
 import { IResSIgnIn } from '../types/response/IResSIgnIn';
+import { IUser } from '../types/type/IAuthUser';
+import { ACCOUNT_ROLE_ENUM } from '../enums/account-role-enum';
 
 export class AuthController {
   static async signIn(request: Request, res: Response, next: NextFunction) {
@@ -28,15 +30,16 @@ export class AuthController {
       if (!passwordMatch) {
         throw new BadRequestError('Sign in failed');
       }
-      const token = jwt.sign({ email: user.email }, ENV.JWT_SECRET);
+      const verifyUser: IUser = {
+        name: user.name,
+        email: user.email,
+        role: user.role as ACCOUNT_ROLE_ENUM,
+        id: user.id,
+      };
+      const token = jwt.sign(verifyUser, ENV.JWT_SECRET);
       const response: IResSIgnIn = {
         access_token: token,
-        user_data: {
-          profile_picture: user.profilePicture,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+        user_data: verifyUser,
       };
       res.data(response);
     } catch (error) {
@@ -62,7 +65,6 @@ export class AuthController {
           profilePicture: 'https://robohash.org/' + body.name,
           password: hashedPassword,
         });
-
         res.success(body.name);
       }
     } catch (error) {
