@@ -36,7 +36,7 @@ jobs:
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password ${{ secrets.DOCKER_HUB_PASSWORD }}
             echo "${{ secrets.ENV_FILE }}" | base64 --decode > /root/.env
             chmod 600 /root/.env
-            docker stop storage-app || true
-            docker rm storage-app || true
+            docker stop aid-backend || true
+            docker rm aid-backend || true
             docker pull rivopelu12/aid-backend:latest
-            docker run -d --name storage-app --env-file /root/.env -p 9090:9090 rivopelu12/aid-backend:latest
+            docker run -d --name aid-backend --env-file /root/.env -p 9090:9090 rivopelu12/aid-backend:latest
