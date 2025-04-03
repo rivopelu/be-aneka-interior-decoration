@@ -9,6 +9,7 @@ import { IResListCategory } from '../types/response/IResListCategory';
 import { IReqCreateProduct } from '../types/request/IReqCreateProduct';
 import { Product } from '../entities/Product';
 import { sql } from 'drizzle-orm/sql/sql';
+import { generateMockProducts } from '../utils/generateMock';
 
 export class ProductController {
   static async listProduct(req: Request, res: Response, next: NextFunction) {
@@ -121,7 +122,6 @@ export class ProductController {
         price: req.body.price,
         image: req.body.image_url,
       });
-
       res.success('product successfully created');
     } catch (err) {
       next(err);
