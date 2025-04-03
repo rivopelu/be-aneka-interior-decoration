@@ -22,6 +22,27 @@
       "when": 1743678652453,
       "tag": "0002_large_power_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1743679089840,
+      "tag": "0003_optimal_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1743679173591,
+      "tag": "0004_bitter_scarecrow",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1743679195510,
+      "tag": "0005_mute_doctor_faustus",
+      "breakpoints": true
     }
   ]
 }
