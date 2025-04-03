@@ -35,7 +35,7 @@ export class ProductController {
       next(error);
     }
   }
-  static async listCategory(req: Request, res: Response, next: NextFunction) {
+  static async listCategory(_req: Request, res: Response, next: NextFunction) {
     try {
       const findCategory = await db
         .select()

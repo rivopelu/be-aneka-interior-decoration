@@ -43,6 +43,13 @@
       "when": 1743679195510,
       "tag": "0005_mute_doctor_faustus",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1743680605912,
+      "tag": "0006_lively_sentry",
+      "breakpoints": true
     }
   ]
 }
