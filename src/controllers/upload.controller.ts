@@ -1,7 +1,7 @@
 import { BadRequestError } from '../utils/error';
 import { NextFunction, Request, Response } from 'express';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import multer from 'multer'; // If you are using multer for file handling, make sure to import it
+import multer from 'multer';
 
 export class UploadController {
   public async upload(req: Request, res: Response, next: NextFunction) {

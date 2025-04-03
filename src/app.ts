@@ -8,6 +8,7 @@ import { accountRoutes } from './routes/account.routes';
 import multer from 'multer';
 import { uploadRoutes } from './routes/upload.routes';
 import cors from 'cors';
+import { productRoutes } from './routes/product.routes';
 const app: Application = express();
 app.use(
   cors({
@@ -20,6 +21,7 @@ app.use(
 function setupRoutes() {
   app.use(PingRoutes);
   app.use(uploadRoutes);
+  app.use(productRoutes);
   app.use('/auth', AuthRoutes);
   app.use('/account', accountRoutes);
 }
