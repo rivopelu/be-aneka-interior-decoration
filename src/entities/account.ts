@@ -2,7 +2,6 @@ import * as t from 'drizzle-orm/mysql-core';
 import { mysqlTable as table } from 'drizzle-orm/mysql-core';
 import { ACCOUNT_ROLE_ENUM } from '../enums/account-role-enum';
 import { baseEntity } from '../db/base-entity';
-import { sql } from 'drizzle-orm';
 
 export const account = table('account', {
   ...baseEntity,

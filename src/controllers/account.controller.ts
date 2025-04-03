@@ -5,6 +5,7 @@ import { account } from '../entities/account';
 import { NotFoundError, UnauthorizedError } from '../utils/error';
 import { IUser } from '../types/type/IAuthUser';
 import { ACCOUNT_ROLE_ENUM } from '../enums/account-role-enum';
+import { IReqCreateCategory } from '../types/request/IReqCreateCategory';
 
 export class AccountController {
   static async assignAdmin(req: Request, res: Response, next: NextFunction) {
@@ -54,7 +55,7 @@ export class AccountController {
         created_by: user.createdBy,
         role: user.role as ACCOUNT_ROLE_ENUM,
         name: user.name,
-        profile_picture: user.profilePicture
+        profile_picture: user.profilePicture,
       };
       res.data(response);
     } catch (error) {
@@ -66,17 +67,16 @@ export class AccountController {
     try {
       const { page = 0, size = 10, name = '' } = req.query;
 
-      const offset = Number(page) * Number(size); // Offset starts at 0 for page 0
+      const offset = Number(page) * Number(size);
       const limit = Number(size);
 
-      // Using a single query to fetch both paginated accounts and the total count
       const accountsQuery = db
         .select()
         .from(account)
-        .where(like(account.name, `%${name}%`)) // Like filter for name
+        .where(like(account.name, `%${name}%`))
         .offset(offset)
         .limit(limit)
-        .orderBy(desc(account.createdDate)); // Order by createdDate in descending order
+        .orderBy(desc(account.createdDate));
 
       const totalCountQuery = db
         .select()
@@ -96,7 +96,7 @@ export class AccountController {
         email: user.email,
         role: user.role as ACCOUNT_ROLE_ENUM,
         name: user.name,
-        profile_picture: user.profilePicture
+        profile_picture: user.profilePicture,
       }));
 
       res.paginated(response, {
