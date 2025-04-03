@@ -3,14 +3,66 @@ import { IReqCreateCategory } from '../types/request/IReqCreateCategory';
 import { db } from '../db/database';
 import { Category } from '../entities/Category';
 import { generateSlug } from '../utils/generate-slug';
-import { count, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq, ilike, like } from 'drizzle-orm';
 import { BadRequestError, NotFoundError } from '../utils/error';
 import { IResListCategory } from '../types/response/IResListCategory';
 import { IReqCreateProduct } from '../types/request/IReqCreateProduct';
 import { Product } from '../entities/Product';
-import { IResDetailProduct } from '../types/response/IResDetailProduct';
+import { sql } from 'drizzle-orm/sql/sql';
 
 export class ProductController {
+  static async listProduct(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        page = '0',
+        size = '10',
+        name = '',
+        category_id = '',
+      } = req.query;
+
+      const offset = Number(page) * Number(size);
+      const limit = Number(size);
+
+      const conditions = [];
+      if (name) conditions.push(like(Product.name, `%${name}%`));
+      if (category_id)
+        conditions.push(eq(Product.categoryId, String(category_id)));
+
+      const totalData = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(Product)
+        .where(and(...conditions))
+        .then((res) => res[0]?.count ?? 0);
+
+      const products = await db
+        .select({
+          id: Product.id,
+          name: Product.name,
+          slug: Product.slug,
+          description: Product.description,
+          image: Product.image,
+          price: Product.price,
+          category_id: Category.id,
+          category_name: Category.name,
+          category_slug: Category.slug,
+        })
+        .from(Product)
+        .leftJoin(Category, eq(Product.categoryId, Category.id))
+        .where(and(...conditions))
+        .orderBy(desc(Product.createdDate))
+        .limit(limit)
+        .offset(offset);
+
+      res.paginated(products, {
+        total_data: totalData,
+        page_count: Math.ceil(totalData / limit),
+        size: limit,
+        page: Number(page),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async detailProduct(req: Request, res: Response, next: NextFunction) {
     const findProduct = await db
       .select({
