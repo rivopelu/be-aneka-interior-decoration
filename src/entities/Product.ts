@@ -15,6 +15,7 @@ export const Product = table('product', {
       onDelete: 'cascade',
     }),
   price: t.int().notNull(),
+  slug: t.varchar('slug', { length: 256 }).notNull().unique(),
 });
 
 export const ProductRelations = relations(Product, ({ one }) => ({

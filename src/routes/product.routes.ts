@@ -11,5 +11,6 @@ router.post(
   ProductController.createNewCategory,
 );
 
+router.post('/v1/product/new', verifyAdmin, ProductController.createNewProduct);
 router.get('/v1/category/list', ProductController.listCategory);
 export const productRoutes = router;
