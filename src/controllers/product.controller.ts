@@ -70,6 +70,7 @@ export class ProductController {
         id: Product.id,
         slug: Product.slug,
         description: Product.description,
+        name: Product.name,
         price: Product.price,
         image: Product.image,
         category_slug: Category.slug,
