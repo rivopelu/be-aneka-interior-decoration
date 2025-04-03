@@ -7,8 +7,15 @@ import { AuthRoutes } from './routes/auth.routes';
 import { accountRoutes } from './routes/account.routes';
 import multer from 'multer';
 import { uploadRoutes } from './routes/upload.routes';
-
+import cors from 'cors';
 const app: Application = express();
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
 
 function setupRoutes() {
   app.use(PingRoutes);

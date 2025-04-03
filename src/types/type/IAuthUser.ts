@@ -8,4 +8,5 @@ export interface IUser {
   role: ACCOUNT_ROLE_ENUM;
   created_date: Date;
   created_by: string;
+  profile_picture: string | null;
 }

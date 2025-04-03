@@ -54,6 +54,7 @@ export class AccountController {
         created_by: user.createdBy,
         role: user.role as ACCOUNT_ROLE_ENUM,
         name: user.name,
+        profile_picture: user.profilePicture
       };
       res.data(response);
     } catch (error) {
@@ -95,6 +96,7 @@ export class AccountController {
         email: user.email,
         role: user.role as ACCOUNT_ROLE_ENUM,
         name: user.name,
+        profile_picture: user.profilePicture
       }));
 
       res.paginated(response, {
