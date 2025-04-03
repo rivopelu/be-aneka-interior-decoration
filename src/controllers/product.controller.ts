@@ -4,12 +4,39 @@ import { db } from '../db/database';
 import { Category } from '../entities/Category';
 import { generateSlug } from '../utils/generate-slug';
 import { count, desc, eq } from 'drizzle-orm';
-import { BadRequestError } from '../utils/error';
+import { BadRequestError, NotFoundError } from '../utils/error';
 import { IResListCategory } from '../types/response/IResListCategory';
 import { IReqCreateProduct } from '../types/request/IReqCreateProduct';
 import { Product } from '../entities/Product';
+import { IResDetailProduct } from '../types/response/IResDetailProduct';
 
 export class ProductController {
+  static async detailProduct(req: Request, res: Response, next: NextFunction) {
+    const findProduct = await db
+      .select({
+        id: Product.id,
+        slug: Product.slug,
+        description: Product.description,
+        price: Product.price,
+        image: Product.image,
+        category_slug: Category.slug,
+        category_id: Category.id,
+        category_name: Category.name,
+      })
+      .from(Product)
+      .innerJoin(Category, eq(Product.categoryId, Category.id))
+      .where(eq(Product.id, req.params.id));
+    const product = findProduct[0];
+    if (!product) {
+      throw new NotFoundError('Product not found');
+    }
+
+    try {
+      res.data(product);
+    } catch (e) {
+      next(e);
+    }
+  }
   static async createNewProduct(
     req: Request,
     res: Response,

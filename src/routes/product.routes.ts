@@ -10,7 +10,8 @@ router.post(
   verifyAdmin,
   ProductController.createNewCategory,
 );
+router.get('/v1/category/list', ProductController.listCategory);
 
 router.post('/v1/product/new', verifyAdmin, ProductController.createNewProduct);
-router.get('/v1/category/list', ProductController.listCategory);
+router.get('/v1/product/detail/:id', ProductController.detailProduct);
 export const productRoutes = router;
