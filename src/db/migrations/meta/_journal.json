@@ -15,6 +15,13 @@
       "when": 1743618857496,
       "tag": "0001_silky_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1743678652453,
+      "tag": "0002_large_power_pack",
+      "breakpoints": true
     }
   ]
 }
