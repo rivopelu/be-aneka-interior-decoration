@@ -8,7 +8,7 @@ import { accountRoutes } from './routes/account.routes';
 import { uploadRoutes } from './routes/upload.routes';
 import cors from 'cors';
 import { productRoutes } from './routes/product.routes';
-import { chartRoutes } from './routes/chart.routes';
+import { cartRoutes } from './routes/cart.routes';
 
 const app: Application = express();
 app.use(
@@ -25,7 +25,7 @@ function setupRoutes() {
   app.use(productRoutes);
   app.use('/auth', AuthRoutes);
   app.use('/account', accountRoutes);
-  app.use('/chart', chartRoutes);
+  app.use('/chart', cartRoutes);
 }
 
 function setupServer(): void {

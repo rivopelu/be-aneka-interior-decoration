@@ -5,6 +5,7 @@ import verifyToken from '../middlewares/verify-token';
 const router = Router();
 const controller = new ChartController();
 router.post('/v1/add', verifyToken, controller.addToChart);
+router.get('/v1/list', verifyToken, controller.getList);
 router.delete('/v1/remove/:cartId', verifyToken, controller.removeItem);
 
-export const chartRoutes = router;
+export const cartRoutes = router;

@@ -1,12 +1,39 @@
 import { CartRepository } from '../repositories/cart.repository';
 import { NextFunction, Request, Response } from 'express';
-import { BadRequestError, NotFoundError } from '../utils/error';
+import { NotFoundError } from '../utils/error';
 import { ProductRepository } from '../repositories/product.repository';
 import { db } from '../db/database';
 import { Cart } from '../entities/Cart';
 import { eq } from 'drizzle-orm';
+import { IResListCart } from '../types/response/IResListCart';
 
 export class ChartController {
+  async getList(req: Request, res: Response, next: NextFunction) {
+    const userId = req.user.id as string;
+    const items = await CartRepository.getList(userId);
+    const resData: IResListCart[] = items.map((item) => {
+      return {
+        cart_id: item.cart.id,
+        product_id: item?.product?.id,
+        name: item.product?.name,
+        category_name: item.category?.name,
+        category_id: item.category?.id,
+        category_slug: item.category?.slug,
+        image: item.product?.image,
+        price_per_qty: item.product?.price || 0,
+        total_price: item.product?.price
+          ? item.product.price * item.cart.qty
+          : 0,
+        created_date: item.cart?.createdDate,
+        qty: item.cart.qty,
+      };
+    });
+    try {
+      res.data(resData);
+    } catch (err) {
+      next(err);
+    }
+  }
   async removeItem(req: Request, res: Response, next: NextFunction) {
     const { cartId } = req.params;
     try {
