@@ -7,6 +7,19 @@ import { Cart } from '../entities/Cart';
 import { eq } from 'drizzle-orm';
 
 export class ChartController {
+  async removeItem(req: Request, res: Response, next: NextFunction) {
+    const { cartId } = req.params;
+    try {
+      const cart = await CartRepository.findOne(cartId);
+      if (!cart) {
+        throw new NotFoundError('cart not found');
+      }
+      await db.delete(Cart).where(eq(Cart.id, cartId));
+      res.success('oke');
+    } catch (err) {
+      next(err);
+    }
+  }
   async addToChart(req: Request, res: Response, next: NextFunction) {
     const { id, qty } = req.body;
     const product = await ProductRepository.findProductById(id);
