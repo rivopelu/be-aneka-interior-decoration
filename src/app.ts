@@ -9,6 +9,7 @@ import { uploadRoutes } from './routes/upload.routes';
 import cors from 'cors';
 import { productRoutes } from './routes/product.routes';
 import { cartRoutes } from './routes/cart.routes';
+import { orderRoutes } from './routes/order.routes';
 
 const app: Application = express();
 app.use(
@@ -26,6 +27,7 @@ function setupRoutes() {
   app.use('/auth', AuthRoutes);
   app.use('/account', accountRoutes);
   app.use('/chart', cartRoutes);
+  app.use('/order', orderRoutes);
 }
 
 function setupServer(): void {
