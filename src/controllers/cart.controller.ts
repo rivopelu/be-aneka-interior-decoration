@@ -77,7 +77,7 @@ export class ChartController {
         await db
           .update(Cart)
           .set({
-            qty: Number(cart.qty) + qty,
+            qty: qty,
             updatedDate: new Date(),
             updatedBy: req.user.id,
           })
