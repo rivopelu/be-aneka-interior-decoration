@@ -35,8 +35,8 @@ export class OrderController {
       throw new BadRequestError('Destination Code is required');
     }
     const data = {
-      origin: 'JOG',
-      destination: 'MDC20400',
+      origin: ENV.SHIPPING_STORE_ORIGIN_CODE,
+      destination: destinationCode,
       weight: '1',
       p: '12',
       l: '12',
