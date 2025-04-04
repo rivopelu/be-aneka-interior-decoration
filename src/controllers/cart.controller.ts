@@ -4,10 +4,21 @@ import { NotFoundError } from '../utils/error';
 import { ProductRepository } from '../repositories/product.repository';
 import { db } from '../db/database';
 import { Cart } from '../entities/Cart';
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import { IResListCart } from '../types/response/IResListCart';
 
 export class ChartController {
+  async getCountItem(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await db
+        .select({ count: count() })
+        .from(Cart)
+        .where(eq(Cart.accountId, req.user.id));
+      res.data(data[0]?.count || 0);
+    } catch (e) {
+      next(e);
+    }
+  }
   async getList(req: Request, res: Response, next: NextFunction) {
     const userId = req.user.id as string;
     const items = await CartRepository.getList(userId);
