@@ -5,10 +5,10 @@ import { PingRoutes } from './routes/ping.routes';
 import { responseEnhancer } from './middlewares/responseEnhancer';
 import { AuthRoutes } from './routes/auth.routes';
 import { accountRoutes } from './routes/account.routes';
-import multer from 'multer';
 import { uploadRoutes } from './routes/upload.routes';
 import cors from 'cors';
 import { productRoutes } from './routes/product.routes';
+
 const app: Application = express();
 app.use(
   cors({
