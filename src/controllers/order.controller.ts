@@ -2,17 +2,81 @@ import { NextFunction, Request, Response } from 'express';
 import { HttpService } from '../services/http.service';
 import { ENV } from '../constants/env';
 import { EXTERNAL_ENDPOINT } from '../constants/endpoint';
-import { BadRequestError } from '../utils/error';
+import { BadRequestError, NotFoundError } from '../utils/error';
 import { IResCheckDeliveryFee } from '../types/response/IResCheckDeliveryFee';
+import { IReqCreateOrder } from '../types/request/IReqCreateOrder';
+import { DeliveryAddressRepository } from '../repositories/delivery-address.repository';
+import { ProductRepository } from '../repositories/product.repository';
+import { db } from '../db/database';
+import { Order } from '../entities/Order';
+import { ORDER_STATUS_ENUM } from '../enums/order-status-enum';
+import { OrderProduct } from '../entities/OrderProduct';
 
 export class OrderController {
+  async createOrder(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    const data = req.body as IReqCreateOrder
+    const deliverAddress = await DeliveryAddressRepository.findById(data.shipping_address_id)
+    if (!deliverAddress) {
+      throw new NotFoundError("Delivery address not found")
+    }
+    const products = await ProductRepository.findInProductId(data.products.map(e => e.id))
+    if (products.length != data.products.length) {
+      throw new BadRequestError("Products not found")
+    }
+
+    const findProduct = data.products.map(e => {
+      const product = products.find(pr => pr.id = e.id)
+      if (!product) throw new BadRequestError("Product not found")
+      return {
+        ...product,
+        total_price: product.price * e.qty,
+        qty: e.qty
+      }
+    })
+    const productPriceSum = findProduct.map(e => e.total_price).reduce((acc, curr) => acc + curr, 0)
+    const totalPayment = productPriceSum + data.delivery_cost;
+    const createOrder = await db.insert(Order).values({
+      delivery_cost: data.delivery_cost,
+      deliveryServiceName: data.delivery_service_name,
+      deliveryServiceDescription: data.delivery_service_description,
+      deliveryServiceEstimated: data.delivery_service_estimated,
+      total_payment: totalPayment,
+      total_for_goods_payment: productPriceSum,
+      accountId: String(req.user.id),
+      shippingAddressId: deliverAddress.id,
+      status: ORDER_STATUS_ENUM.WAITING_PAYMENT,
+      createdBy: String(req.user.id)
+    }).$returningId()
+
+    const orderId = createOrder[0].id
+    await db.insert(OrderProduct).values(
+      findProduct.map(e => ({
+        createdBy: String(req.user.id),
+        accountId: String(req.user.id),
+        productId: e.id,
+        orderId: orderId,
+        qty: e.qty,
+        total_price: e.total_price,
+        price_per_qty: e.price
+      }))
+    );
+
+    try {
+      res.success("Oke")
+    } catch (e) {
+      next(e)
+    }
+  }
   async getShippingDestination(
     req: Request,
     res: Response,
     next: NextFunction,
   ) {
     const httpService = new HttpService(ENV.SHIPPING_SERVICE_ENDPOINT);
-
     const q = String(req.query.q);
     if (!q) {
       res.data([]);
