@@ -8,4 +8,6 @@ export const ENV = {
   DB_USER: process.env.DB_USER,
   DB_PASSWORD: process.env.DB_PASSWORD,
   JWT_SECRET: String(process.env.JWT_SECRET),
+  SHIPPING_SERVICE_ENDPOINT: process.env.SHIPPING_SERVICE_ENDPOINT,
+  SHIPPING_STORE_ORIGIN_CODE: process.env.SHIPPING_STORE_ORIGIN_CODE,
 };

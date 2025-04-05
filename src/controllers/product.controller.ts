@@ -1,15 +1,14 @@
+import { and, count, desc, eq, like } from 'drizzle-orm';
+import { sql } from 'drizzle-orm/sql/sql';
 import { NextFunction, Request, Response } from 'express';
-import { IReqCreateCategory } from '../types/request/IReqCreateCategory';
 import { db } from '../db/database';
 import { Category } from '../entities/Category';
-import { generateSlug } from '../utils/generate-slug';
-import { and, count, desc, eq, ilike, like } from 'drizzle-orm';
-import { BadRequestError, NotFoundError } from '../utils/error';
-import { IResListCategory } from '../types/response/IResListCategory';
-import { IReqCreateProduct } from '../types/request/IReqCreateProduct';
 import { Product } from '../entities/Product';
-import { sql } from 'drizzle-orm/sql/sql';
-import { generateMockProducts } from '../utils/generateMock';
+import { IReqCreateCategory } from '../types/request/IReqCreateCategory';
+import { IReqCreateProduct } from '../types/request/IReqCreateProduct';
+import { IResListCategory } from '../types/response/IResListCategory';
+import { BadRequestError, NotFoundError } from '../utils/error';
+import { generateSlug } from '../utils/generate-slug';
 
 export class ProductController {
   static async listProduct(req: Request, res: Response, next: NextFunction) {
@@ -46,6 +45,7 @@ export class ProductController {
           category_id: Category.id,
           category_name: Category.name,
           category_slug: Category.slug,
+          created_date: Product.createdDate
         })
         .from(Product)
         .leftJoin(Category, eq(Product.categoryId, Category.id))
@@ -70,10 +70,12 @@ export class ProductController {
         id: Product.id,
         slug: Product.slug,
         description: Product.description,
+        name: Product.name,
         price: Product.price,
         image: Product.image,
         category_slug: Category.slug,
         category_id: Category.id,
+        created_date: Product.createdDate,
         category_name: Category.name,
       })
       .from(Product)

@@ -2,21 +2,82 @@ import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/database';
 import { desc, eq, like } from 'drizzle-orm';
 import { account } from '../entities/account';
-import { NotFoundError, UnauthorizedError } from '../utils/error';
+import {
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../utils/error';
 import { IUser } from '../types/type/IAuthUser';
 import { ACCOUNT_ROLE_ENUM } from '../enums/account-role-enum';
-import { IReqCreateCategory } from '../types/request/IReqCreateCategory';
+import { IReqCreateShippingAddress } from '../types/request/IReqCreateShippingAddress';
+import { ShippingAddress } from '../entities/ShippingAddress';
+import { ShippingAddressRepository } from '../repositories/shipping-address.repository';
+import { IResShippingAddress } from '../types/response/IResShippingAddress';
 
 export class AccountController {
+  static async getShippingAddress(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const data = await ShippingAddressRepository.getListAllAddressByUserId(
+        req.user.id,
+      );
+      const resData: IResShippingAddress[] = data.map((e) => {
+        return {
+          destination_code: e.destinationCode,
+          city: e.city,
+          subdistrict: e.subdistrict,
+          province: e.province,
+          address: e.address,
+          created_date: e.createdDate,
+        };
+      });
+      res.data(resData);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async createShippingAddress(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const data: IReqCreateShippingAddress = req.body;
+      const findAddress =
+        await ShippingAddressRepository.findShippingAddressByDestinationCodeAndAccountId(
+          data.destination_code,
+          req.user.id,
+        );
+      if (findAddress) {
+        throw new BadRequestError(
+          `alamat dengan kode ${data.destination_code} sudah ada`,
+        );
+      }
+      await db.insert(ShippingAddress).values({
+        accountId: String(req.user.id),
+        destinationCode: data.destination_code,
+        city: data.city,
+        subdistrict: data.subdistrict,
+        province: data.province,
+        address: data.address,
+        createdBy: String(req.user.id),
+      });
+      res.data(data);
+    } catch (e) {
+      next(e);
+    }
+  }
   static async assignAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.params.id;
-
       const user = await db
         .select()
         .from(account)
         .where(eq(account.id, userId));
-
       if (!user.length) {
         throw new NotFoundError('Account does not exist');
       }

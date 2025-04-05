@@ -1,0 +1,13 @@
+import { db } from '../db/database';
+import { Product } from '../entities/Product';
+import { and, eq } from 'drizzle-orm';
+
+export class ProductRepository {
+  static async findProductById(id: string) {
+    const data = await db
+      .select()
+      .from(Product)
+      .where(and(eq(Product.id, id), eq(Product.active, true)));
+    return data[0];
+  }
+}
