@@ -6,7 +6,7 @@ export const baseEntity = {
     .varchar({ length: 255 })
     .primaryKey()
     .unique()
-    .$defaultFn(() => uuidv4()),
+    .$defaultFn(() => uuidv4().split('-')[0].toUpperCase()),
   active: t.boolean().default(true).notNull(),
   createdDate: t.timestamp('created_date').notNull().defaultNow(),
   createdBy: t
