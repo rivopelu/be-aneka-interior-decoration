@@ -28,6 +28,8 @@ export const Order = table('order', {
     ORDER_STATUS_ENUM.IN_PROGRESS,
     ORDER_STATUS_ENUM.ON_DELIVERY,
     ORDER_STATUS_ENUM.COMPLETED
-  ]).notNull()
+  ]).notNull(),
+  payment_image_url: t.text("payment_image_url"),
+  reject_reason: t.text("reject_reason")
 
 });

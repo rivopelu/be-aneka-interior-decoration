@@ -9,5 +9,6 @@ router.get('/v1/user/list', verifyToken, controller.getListOrderUser);
 router.get('/v1/check-delivery-fee', verifyToken, controller.cekDeliveryFee);
 router.get('/v1/detail/:id', verifyToken, controller.getDetailOrder);
 router.post('/v1/create', verifyToken, controller.createOrder);
+router.put('/v1/upload-payment-image/:id', verifyToken, controller.uploadPaymentImage);
 
 export const orderRoutes = router;

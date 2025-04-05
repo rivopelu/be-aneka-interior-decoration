@@ -22,6 +22,31 @@ import { Cart } from '../entities/Cart';
 import { eq, or } from 'drizzle-orm';
 
 export class OrderController {
+
+  async uploadPaymentImage(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { url } = req.body
+      const { id } = req.params
+      const findOder = await OrderRepository.findById(id)
+      if (!findOder) {
+        throw new NotFoundError("Order not found")
+      }
+      if (!id) {
+        throw new BadRequestError("Id is required")
+      }
+      if (!url) {
+        throw new BadRequestError("Url is required")
+      }
+      await db.update(Order).set({
+        payment_image_url: url,
+        status: ORDER_STATUS_ENUM.PENDING
+      }).where(eq(Order.id, id))
+      res.success("OKE")
+    } catch (e) {
+      next(e)
+    }
+  }
+
   async getListOrderUser(req: Request, res: Response, next: NextFunction) {
     const user: IUser = req.user;
     const list = await OrderRepository.findOrderByUser(user.id);
@@ -84,6 +109,8 @@ export class OrderController {
         delivery_service_estimated: order.order.deliveryServiceEstimated,
         total_payment: order.order.total_payment,
         total_for_goods_payment: order.order.total_for_goods_payment,
+        payment_image_url: order?.order?.payment_image_url,
+        reject_reason: order?.order?.reject_reason,
         status: order.order.status,
         delivery_address: {
           address: order.shippingAddress?.address,

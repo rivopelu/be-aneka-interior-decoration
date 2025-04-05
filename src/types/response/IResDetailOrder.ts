@@ -13,7 +13,9 @@ export interface IResDetailOrder {
   delivery_address: IResShippingAddress
   status: ORDER_STATUS_ENUM,
   products: IResOrderProduct[]
-  created_date: Date
+  created_date: Date,
+  payment_image_url?: string | null;
+  reject_reason?: string | null;
 }
 
 
