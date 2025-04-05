@@ -26,6 +26,7 @@ export class AccountController {
       );
       const resData: IResShippingAddress[] = data.map((e) => {
         return {
+          id: e.id,
           destination_code: e.destinationCode,
           city: e.city,
           subdistrict: e.subdistrict,
