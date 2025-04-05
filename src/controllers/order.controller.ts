@@ -76,6 +76,7 @@ export class OrderController {
       });
 
       const responseData: IResDetailOrder = {
+        id: order.order.id,
         delivery_cost: order.order.delivery_cost,
         delivery_service_name: order.order.deliveryServiceName,
         delivery_service_description: order.order.deliveryServiceDescription,

@@ -3,6 +3,7 @@ import { IResListProduct } from "./IResListProduct";
 import { IResShippingAddress } from "./IResShippingAddress";
 
 export interface IResDetailOrder {
+  id: string;
   delivery_cost: number;
   delivery_service_name: string;
   delivery_service_description: string;
