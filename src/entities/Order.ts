@@ -30,6 +30,7 @@ export const Order = table('order', {
     ORDER_STATUS_ENUM.COMPLETED
   ]).notNull(),
   payment_image_url: t.text("payment_image_url"),
-  reject_reason: t.text("reject_reason")
+  reject_reason: t.text("reject_reason"),
+  delivery_code: t.varchar("delivery_code", { length: 244 })
 
 });

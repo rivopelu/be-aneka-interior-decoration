@@ -22,12 +22,13 @@ import { Cart } from '../entities/Cart';
 import { eq, or } from 'drizzle-orm';
 import { IResListOrderAdmin } from '../types/response/IResListOrderAdmin';
 import { APPROVE_REJECT_ENUM } from '../enums/approve-reject-enum';
+import { IReqApproveRejectOrder } from '../types/request/IReqApproveRejectOrder';
 
 export class OrderController {
 
   async approveRejectOrder(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params
-    const { type, reason } = req.body
+    const { type, reason } = req.body as IReqApproveRejectOrder
     const findOrder = await OrderRepository.findById(id)
     if (!findOrder) {
       throw new NotFoundError("Order Not found")
