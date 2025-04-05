@@ -1,6 +1,6 @@
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../db/database';
 import { Product } from '../entities/Product';
-import { and, eq } from 'drizzle-orm';
 
 export class ProductRepository {
   static async findProductById(id: string) {
@@ -9,5 +9,10 @@ export class ProductRepository {
       .from(Product)
       .where(and(eq(Product.id, id), eq(Product.active, true)));
     return data[0];
+  }
+
+  static async findInProductId(ids: string[]) {
+    return db.select().from(Product)
+      .where(inArray(Product.id, ids));
   }
 }
