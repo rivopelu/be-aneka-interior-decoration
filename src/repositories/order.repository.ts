@@ -6,6 +6,21 @@ import { Product } from "../entities/Product";
 import { ShippingAddress } from "../entities/ShippingAddress";
 
 export class OrderRepository {
+
+  static async findOrderByUser(userId: string) {
+    return db.select().from(Order)
+      .leftJoin(ShippingAddress, eq(Order.shippingAddressId, ShippingAddress.id))
+      .where(and(
+        eq(Order.active, true),
+        eq(Order.accountId, userId),
+      ))
+  }
+  static async getListOrder() {
+    return db.select().from(Order)
+      .leftJoin(ShippingAddress, eq(Order.shippingAddressId, ShippingAddress.id))
+      .where(eq(Order.active, true))
+  }
+
   static async findById(id: string) {
     const rows = await db
       .select()

@@ -1,20 +1,56 @@
 import { NextFunction, Request, Response } from 'express';
-import { HttpService } from '../services/http.service';
-import { ENV } from '../constants/env';
 import { EXTERNAL_ENDPOINT } from '../constants/endpoint';
-import { BadRequestError, NotFoundError } from '../utils/error';
-import { IResCheckDeliveryFee } from '../types/response/IResCheckDeliveryFee';
-import { IReqCreateOrder } from '../types/request/IReqCreateOrder';
-import { DeliveryAddressRepository } from '../repositories/delivery-address.repository';
-import { ProductRepository } from '../repositories/product.repository';
+import { ENV } from '../constants/env';
 import { db } from '../db/database';
 import { Order } from '../entities/Order';
-import { ORDER_STATUS_ENUM } from '../enums/order-status-enum';
 import { OrderProduct } from '../entities/OrderProduct';
+import { ORDER_STATUS_ENUM } from '../enums/order-status-enum';
+import { DeliveryAddressRepository } from '../repositories/delivery-address.repository';
 import { OrderRepository } from '../repositories/order.repository';
+import { ProductRepository } from '../repositories/product.repository';
+import { HttpService } from '../services/http.service';
+import { IReqCreateOrder } from '../types/request/IReqCreateOrder';
+import { IResCheckDeliveryFee } from '../types/response/IResCheckDeliveryFee';
 import { IResDetailOrder, IResOrderProduct } from '../types/response/IResDetailOrder';
+import { IResListOrder } from '../types/response/IResListOrder';
+import { IUser } from '../types/type/IAuthUser';
+import { BadRequestError, NotFoundError } from '../utils/error';
 
 export class OrderController {
+  async getListOrderUser(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const user: IUser = req.user
+    const list = await OrderRepository.findOrderByUser(user.id)
+    const responseData: IResListOrder[] = list.map(e => {
+      return {
+        id: e.order.id,
+        created_date: e.order.createdDate,
+        status: e.order.status,
+        total_payment: e.order.total_payment,
+        delivery_service_name: e.order.deliveryServiceName,
+        delivery_service_description: e.order.deliveryServiceDescription,
+        delivery_service_estimated: e.order.deliveryServiceEstimated,
+        delivery_address: {
+          destination_code: e.shipping_address?.destinationCode,
+          city: e.shipping_address?.city,
+          subdistrict: e.shipping_address?.subdistrict,
+          province: e.shipping_address?.province,
+          address: e.shipping_address?.address,
+          id: e.shipping_address?.id,
+          created_date: e.shipping_address?.createdDate
+        }
+      }
+    })
+
+    try {
+      res.data(responseData)
+    } catch (e) {
+      next(e)
+    }
+  }
 
   async getDetailOrder(
     req: Request,
