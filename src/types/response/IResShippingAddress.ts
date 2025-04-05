@@ -4,5 +4,6 @@ export interface IResShippingAddress {
   subdistrict: string;
   province: string;
   address: string;
+  id: string;
   created_date: Date;
 }
