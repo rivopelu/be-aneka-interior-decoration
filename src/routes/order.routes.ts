@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import verifyToken from '../middlewares/verify-token';
+import verifyToken, { verifyAdmin } from '../middlewares/verify-token';
 import { OrderController } from '../controllers/order.controller';
 
 const router = Router();
 const controller = new OrderController();
+router.get('/v1/admin/list', verifyAdmin, controller.getListOrderAdmin);
+router.put('/v1/admin/approve-reject/:id', verifyAdmin, controller.approveRejectOrder);
 router.get('/v1/admin/list', verifyToken, controller.getListOrderAdmin);
 router.get('/v1/destination', verifyToken, controller.getShippingDestination);
 router.get('/v1/user/list', verifyToken, controller.getListOrderUser);

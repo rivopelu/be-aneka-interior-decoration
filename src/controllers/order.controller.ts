@@ -20,9 +20,47 @@ import { IUser } from '../types/type/IAuthUser';
 import { BadRequestError, NotFoundError } from '../utils/error';
 import { Cart } from '../entities/Cart';
 import { eq, or } from 'drizzle-orm';
+import { IResListOrderAdmin } from '../types/response/IResListOrderAdmin';
+import { APPROVE_REJECT_ENUM } from '../enums/approve-reject-enum';
 
 export class OrderController {
 
+  async approveRejectOrder(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params
+    const { type, reason } = req.body
+    const findOrder = await OrderRepository.findById(id)
+    if (!findOrder) {
+      throw new NotFoundError("Order Not found")
+    }
+    if (type === APPROVE_REJECT_ENUM.REJECT) {
+      if (!reason) {
+        throw new BadRequestError("For reject reason is required")
+      }
+      await db.update(Order).set({
+        status: ORDER_STATUS_ENUM.REJECTED,
+        updatedBy: req.user.id,
+        reject_reason: reason,
+        updatedDate: new Date()
+
+      })
+        .where(eq(Order.id, id))
+    } else if (type === APPROVE_REJECT_ENUM.APPROVE) {
+      await db.update(Order).set({
+        status: ORDER_STATUS_ENUM.IN_PROGRESS,
+        updatedBy: req.user.id,
+        updatedDate: new Date()
+      })
+        .where(eq(Order.id, id))
+    } else {
+      throw new BadRequestError("Type not valid")
+    }
+
+    try {
+      res.success("OKE")
+    } catch (e) {
+      next(e)
+    }
+  }
   async uploadPaymentImage(req: Request, res: Response, next: NextFunction) {
     try {
       const { url } = req.body
@@ -54,9 +92,13 @@ export class OrderController {
     const offset = Number(page) * Number(size);
     const limit = Number(size);
     const data = await OrderRepository.getListOrderAdmin(offset, limit, String(id))
-    const responseData: IResListOrder[] = data.orders.map((e) => {
+    const responseData: IResListOrderAdmin[] = data.orders.map((e) => {
       return {
         id: e.order.id,
+        account_email: e.account?.email,
+        account_id: e.account?.id,
+        account_name: e.account?.name,
+        account_profile_picture: e.account?.profilePicture,
         created_date: e.order.createdDate,
         status: e.order.status,
         total_payment: e.order.total_payment,
@@ -151,6 +193,10 @@ export class OrderController {
         payment_image_url: order?.order?.payment_image_url,
         reject_reason: order?.order?.reject_reason,
         status: order.order.status,
+        account_profile_picture: order.account?.profilePicture,
+        account_name: order.account?.name,
+        account_email: order.account?.email,
+        account_id: order.account?.id,
         delivery_address: {
           address: order.shippingAddress?.address,
           city: order.shippingAddress?.city,

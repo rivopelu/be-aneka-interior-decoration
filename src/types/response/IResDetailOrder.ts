@@ -16,6 +16,10 @@ export interface IResDetailOrder {
   created_date: Date,
   payment_image_url?: string | null;
   reject_reason?: string | null;
+  account_name?: string | null;
+  account_profile_picture?: string | null;
+  account_email?: string | null;
+  account_id?: string | null
 }
 
 

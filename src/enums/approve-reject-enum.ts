@@ -1,0 +1,4 @@
+export enum APPROVE_REJECT_ENUM {
+  APPROVE = "APPROVE",
+  REJECT = "REJECT"
+}

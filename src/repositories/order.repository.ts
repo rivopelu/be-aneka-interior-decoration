@@ -5,6 +5,7 @@ import { OrderProduct } from "../entities/OrderProduct";
 import { Product } from "../entities/Product";
 import { ShippingAddress } from "../entities/ShippingAddress";
 import { count } from "console";
+import { account } from "../entities/account";
 
 export class OrderRepository {
 
@@ -23,6 +24,7 @@ export class OrderRepository {
 
     const orderQuery = db.select().from(Order)
       .leftJoin(ShippingAddress, eq(Order.shippingAddressId, ShippingAddress.id))
+      .leftJoin(account, eq(Order.accountId, account.id))
       .where(and(...conditions))
       .offset(offset)
       .limit(limit)
@@ -51,6 +53,7 @@ export class OrderRepository {
     const rows = await db
       .select()
       .from(Order)
+      .leftJoin(account, eq(Order.accountId, account.id))
       .leftJoin(ShippingAddress, eq(Order.shippingAddressId, ShippingAddress.id))
       .leftJoin(OrderProduct, eq(OrderProduct.orderId, Order.id))
       .leftJoin(Product, eq(Product.id, OrderProduct.productId))
@@ -59,6 +62,7 @@ export class OrderRepository {
     if (!rows.length) return null;
 
     const order = rows[0].order ?? rows[0].order;
+    const accountData = rows[0].account ?? rows[0].account;
     const shippingAddress = rows[0].shipping_address
     const orderProducts = rows
       .filter(row => row.order_product?.id)
@@ -69,7 +73,8 @@ export class OrderRepository {
     return {
       order,
       orderProducts,
-      shippingAddress
+      shippingAddress,
+      account: accountData
     }
   }
 }
