@@ -13,6 +13,7 @@ export interface IResDetailOrder {
   delivery_address: IResShippingAddress
   status: ORDER_STATUS_ENUM,
   products: IResOrderProduct[]
+  created_date: Date
 }
 
 
