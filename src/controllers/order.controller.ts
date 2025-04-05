@@ -11,8 +11,61 @@ import { db } from '../db/database';
 import { Order } from '../entities/Order';
 import { ORDER_STATUS_ENUM } from '../enums/order-status-enum';
 import { OrderProduct } from '../entities/OrderProduct';
+import { OrderRepository } from '../repositories/order.repository';
+import { IResDetailOrder, IResOrderProduct } from '../types/response/IResDetailOrder';
 
 export class OrderController {
+
+  async getDetailOrder(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const order = await OrderRepository.findById(String(req.params.id))
+      if (!order) {
+        throw new NotFoundError("Order not found")
+      }
+
+
+      const products: IResOrderProduct[] = order.orderProducts.map(e => {
+        return {
+          total_price: ((e?.qty || 0) * (e.product?.price || 0)) || 0,
+          qty: e?.qty || 0,
+          price_per_qty: e.price_per_qty,
+          name: e.product?.name,
+          id: e.product?.id,
+          slug: e.product?.slug,
+          description: e.product?.description,
+          image: e.product?.image,
+          price: e.product?.price,
+          created_date: e.product?.createdDate
+        }
+      })
+
+      const responseData: IResDetailOrder = {
+        delivery_cost: order.order.delivery_cost,
+        delivery_service_name: order.order.deliveryServiceName,
+        delivery_service_description: order.order.deliveryServiceDescription,
+        delivery_service_estimated: order.order.deliveryServiceEstimated,
+        total_payment: order.order.total_payment,
+        total_for_goods_payment: order.order.total_for_goods_payment,
+        status: order.order.status,
+        delivery_address: {
+          address: order.shippingAddress?.address,
+          city: order.shippingAddress?.city,
+          created_date: order?.shippingAddress?.createdDate,
+          destination_code: order?.shippingAddress?.destinationCode
+        },
+        products: products
+      }
+
+      res.data(responseData)
+    } catch (e) {
+      next(e)
+    }
+  }
+
   async createOrder(
     req: Request,
     res: Response,

@@ -1,12 +1,34 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../db/database";
 import { Order } from "../entities/Order";
+import { OrderProduct } from "../entities/OrderProduct";
+import { Product } from "../entities/Product";
+import { ShippingAddress } from "../entities/ShippingAddress";
 
 export class OrderRepository {
-  async findById(id: string) {
-    const result = await db.select().from(Order).where(
-      and(eq(Order.id, id), eq(Order.active, true))
-    ).limit(1)
-    return result[0]
+  static async findById(id: string) {
+    const rows = await db
+      .select()
+      .from(Order)
+      .leftJoin(ShippingAddress, eq(Order.shippingAddressId, ShippingAddress.id))
+      .leftJoin(OrderProduct, eq(OrderProduct.orderId, Order.id))
+      .leftJoin(Product, eq(Product.id, OrderProduct.productId))
+      .where(and(eq(Order.id, id), eq(Order.active, true)));
+
+    if (!rows.length) return null;
+
+    const order = rows[0].order ?? rows[0].order;
+    const shippingAddress = rows[0].shipping_address
+    const orderProducts = rows
+      .filter(row => row.order_product?.id)
+      .map(row => ({
+        ...row.order_product,
+        product: row.product,
+      }));
+    return {
+      order,
+      orderProducts,
+      shippingAddress
+    }
   }
 }
