@@ -41,7 +41,46 @@ export class OrderController {
         payment_image_url: url,
         status: ORDER_STATUS_ENUM.PENDING
       }).where(eq(Order.id, id))
+
+
       res.success("OKE")
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  async getListOrderAdmin(req: Request, res: Response, next: NextFunction) {
+    const { page = 0, size = 10, id = '' } = req.query;
+    const offset = Number(page) * Number(size);
+    const limit = Number(size);
+    const data = await OrderRepository.getListOrderAdmin(offset, limit, String(id))
+    const responseData: IResListOrder[] = data.orders.map((e) => {
+      return {
+        id: e.order.id,
+        created_date: e.order.createdDate,
+        status: e.order.status,
+        total_payment: e.order.total_payment,
+        delivery_service_name: e.order.deliveryServiceName,
+        delivery_service_description: e.order.deliveryServiceDescription,
+        delivery_service_estimated: e.order.deliveryServiceEstimated,
+        delivery_address: {
+          destination_code: e.shipping_address?.destinationCode,
+          city: e.shipping_address?.city,
+          subdistrict: e.shipping_address?.subdistrict,
+          province: e.shipping_address?.province,
+          address: e.shipping_address?.address,
+          id: e.shipping_address?.id,
+          created_date: e.shipping_address?.createdDate,
+        },
+      };
+    });
+    try {
+      res.paginated(responseData, {
+        total_data: data.totalRecords,
+        page_count: Math.ceil(data.totalRecords / limit),
+        size: limit,
+        page: Number(page),
+      })
     } catch (e) {
       next(e)
     }
