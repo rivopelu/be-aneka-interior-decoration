@@ -19,7 +19,7 @@ import { IResListOrder } from '../types/response/IResListOrder';
 import { IUser } from '../types/type/IAuthUser';
 import { BadRequestError, NotFoundError } from '../utils/error';
 import { Cart } from '../entities/Cart';
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 
 export class OrderController {
   async getListOrderUser(req: Request, res: Response, next: NextFunction) {
@@ -90,6 +90,9 @@ export class OrderController {
           city: order.shippingAddress?.city,
           created_date: order?.shippingAddress?.createdDate,
           destination_code: order?.shippingAddress?.destinationCode,
+          id: order.shippingAddress?.id,
+          province: order.shippingAddress?.province,
+          subdistrict: order.shippingAddress?.subdistrict
         },
         products: products,
       };
