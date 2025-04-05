@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db/database";
 import { Order } from "../entities/Order";
 import { OrderProduct } from "../entities/OrderProduct";
@@ -13,7 +13,7 @@ export class OrderRepository {
       .where(and(
         eq(Order.active, true),
         eq(Order.accountId, userId),
-      ))
+      )).orderBy(desc(Order.createdDate))
   }
   static async getListOrder() {
     return db.select().from(Order)
