@@ -5,6 +5,8 @@ import { OrderController } from '../controllers/order.controller';
 const router = Router();
 const controller = new OrderController();
 router.get('/v1/admin/list', verifyAdmin, controller.getListOrderAdmin);
+router.patch('/v1/user/confirm/:id', verifyToken, controller.confirmOrder);
+router.put('/v1/admin/input-resi/:id', verifyAdmin, controller.inputResi);
 router.put('/v1/admin/approve-reject/:id', verifyAdmin, controller.approveRejectOrder);
 router.get('/v1/admin/list', verifyToken, controller.getListOrderAdmin);
 router.get('/v1/destination', verifyToken, controller.getShippingDestination);

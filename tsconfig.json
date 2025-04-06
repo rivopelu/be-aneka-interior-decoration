@@ -12,6 +12,6 @@
     "types": ["node", "./src/types/type/global"]
 
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "index.js"],
   "exclude": ["node_modules"]
 }

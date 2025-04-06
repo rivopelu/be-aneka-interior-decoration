@@ -1,14 +1,18 @@
+import { eq } from 'drizzle-orm';
 import { NextFunction, Request, Response } from 'express';
 import { EXTERNAL_ENDPOINT } from '../constants/endpoint';
 import { ENV } from '../constants/env';
 import { db } from '../db/database';
+import { Cart } from '../entities/Cart';
 import { Order } from '../entities/Order';
 import { OrderProduct } from '../entities/OrderProduct';
+import { APPROVE_REJECT_ENUM } from '../enums/approve-reject-enum';
 import { ORDER_STATUS_ENUM } from '../enums/order-status-enum';
 import { DeliveryAddressRepository } from '../repositories/delivery-address.repository';
 import { OrderRepository } from '../repositories/order.repository';
 import { ProductRepository } from '../repositories/product.repository';
 import { HttpService } from '../services/http.service';
+import { IReqApproveRejectOrder } from '../types/request/IReqApproveRejectOrder';
 import { IReqCreateOrder } from '../types/request/IReqCreateOrder';
 import { IResCheckDeliveryFee } from '../types/response/IResCheckDeliveryFee';
 import {
@@ -16,15 +20,50 @@ import {
   IResOrderProduct,
 } from '../types/response/IResDetailOrder';
 import { IResListOrder } from '../types/response/IResListOrder';
+import { IResListOrderAdmin } from '../types/response/IResListOrderAdmin';
 import { IUser } from '../types/type/IAuthUser';
 import { BadRequestError, NotFoundError } from '../utils/error';
-import { Cart } from '../entities/Cart';
-import { eq, or } from 'drizzle-orm';
-import { IResListOrderAdmin } from '../types/response/IResListOrderAdmin';
-import { APPROVE_REJECT_ENUM } from '../enums/approve-reject-enum';
-import { IReqApproveRejectOrder } from '../types/request/IReqApproveRejectOrder';
 
 export class OrderController {
+
+  async confirmOrder(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params
+    const findOrder = await OrderRepository.findById(id)
+    if (!findOrder) {
+      throw new NotFoundError("Order Not found")
+    }
+    try {
+      await db.update(Order)
+        .set({
+          status: ORDER_STATUS_ENUM.COMPLETED
+        })
+        .where(eq(Order.id, id))
+      res.success("OKE")
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  async inputResi(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params
+      const { resi } = req.body
+      const findOrder = await OrderRepository.findById(id)
+      if (!findOrder) {
+        throw new NotFoundError("Order Not found")
+      }
+      if (!resi) {
+        throw new BadRequestError("Resi required")
+      }
+      await db.update(Order).set({
+        delivery_code: resi,
+        status: ORDER_STATUS_ENUM.ON_DELIVERY
+      }).where(eq(Order.id, id))
+      res.success("OKE")
+    } catch (e) {
+      next(e)
+    }
+  }
 
   async approveRejectOrder(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params
@@ -198,6 +237,7 @@ export class OrderController {
         account_name: order.account?.name,
         account_email: order.account?.email,
         account_id: order.account?.id,
+        delivery_code: order.order.delivery_code,
         delivery_address: {
           address: order.shippingAddress?.address,
           city: order.shippingAddress?.city,

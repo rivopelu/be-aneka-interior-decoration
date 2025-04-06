@@ -20,6 +20,7 @@ export interface IResDetailOrder {
   account_profile_picture?: string | null;
   account_email?: string | null;
   account_id?: string | null
+  delivery_code?: string | null
 }
 
 
