@@ -23,107 +23,183 @@ import { IResListOrder } from '../types/response/IResListOrder';
 import { IResListOrderAdmin } from '../types/response/IResListOrderAdmin';
 import { IUser } from '../types/type/IAuthUser';
 import { BadRequestError, NotFoundError } from '../utils/error';
+import { IResOrderReport } from '../types/response/IResOrderReport';
 
 export class OrderController {
+  async getOrderReport(req: Request, res: Response, next: NextFunction) {
+    try {
+      const getOrderComplete = await OrderRepository.getCountOrderByStatus([
+        ORDER_STATUS_ENUM.COMPLETED,
+      ]);
+      const getOrderInProgress = await OrderRepository.getCountOrderByStatus([
+        ORDER_STATUS_ENUM.IN_PROGRESS,
+      ]);
+      const getOrderOnDelivery = await OrderRepository.getCountOrderByStatus([
+        ORDER_STATUS_ENUM.ON_DELIVERY,
+      ]);
+      const getOrderReject = await OrderRepository.getCountOrderByStatus([
+        ORDER_STATUS_ENUM.REJECTED,
+      ]);
+      const getAllOrderProductByStatus =
+        await OrderRepository.getAllOrderProductByOrderStatus([
+          ORDER_STATUS_ENUM.COMPLETED,
+          ORDER_STATUS_ENUM.ON_DELIVERY,
+        ]);
+
+      const sumQty = getAllOrderProductByStatus
+        .map((e) => e.order_product.qty)
+        .reduce((sum, current) => sum + current, 0);
+
+      const sumPrice = getAllOrderProductByStatus
+        .map((e) => e.order_product.total_price)
+        .reduce((sum, current) => sum + current, 0);
+
+      const data: IResOrderReport[] = [];
+      data.push({
+        name: 'Pesanan Selesai',
+        description:
+          'Pesanan yang telah diterima dan di konfirmasi oleh pemesan',
+        value: getOrderComplete,
+      });
+      data.push({
+        name: 'Pesanan Sedang Di Proses',
+        description: 'Pesanan sedang di proses untuk pengiriman',
+        value: getOrderInProgress,
+      });
+      data.push({
+        name: 'Dalam Pengiriman',
+        description: 'Pesanan sedang dalam pengiriman',
+        value: getOrderOnDelivery,
+      });
+      data.push({
+        name: 'Pesanan ditolak',
+        description: 'Pesanan yang ditolak',
+        value: getOrderReject,
+      });
+      data.push({
+        name: 'Produk Terjual',
+        description:
+          'Total akumulasi produk terjual dan sedang dalam pengiriman',
+        value: sumQty,
+      });
+      data.push({
+        name: 'Total Pemasukan',
+        description: 'Total pemasukan dari penjualan',
+        value: sumPrice,
+      });
+      res.data(data);
+    } catch (e) {
+      next(e);
+    }
+  }
 
   async confirmOrder(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params
-    const findOrder = await OrderRepository.findById(id)
+    const { id } = req.params;
+    const findOrder = await OrderRepository.findById(id);
     if (!findOrder) {
-      throw new NotFoundError("Order Not found")
+      throw new NotFoundError('Order Not found');
     }
     try {
-      await db.update(Order)
+      await db
+        .update(Order)
         .set({
-          status: ORDER_STATUS_ENUM.COMPLETED
+          status: ORDER_STATUS_ENUM.COMPLETED,
         })
-        .where(eq(Order.id, id))
-      res.success("OKE")
+        .where(eq(Order.id, id));
+      res.success('OKE');
     } catch (e) {
-      next(e)
+      next(e);
     }
   }
 
   async inputResi(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params
-      const { resi } = req.body
-      const findOrder = await OrderRepository.findById(id)
+      const { id } = req.params;
+      const { resi } = req.body;
+      const findOrder = await OrderRepository.findById(id);
       if (!findOrder) {
-        throw new NotFoundError("Order Not found")
+        throw new NotFoundError('Order Not found');
       }
       if (!resi) {
-        throw new BadRequestError("Resi required")
+        throw new BadRequestError('Resi required');
       }
-      await db.update(Order).set({
-        delivery_code: resi,
-        status: ORDER_STATUS_ENUM.ON_DELIVERY
-      }).where(eq(Order.id, id))
-      res.success("OKE")
+      await db
+        .update(Order)
+        .set({
+          delivery_code: resi,
+          status: ORDER_STATUS_ENUM.ON_DELIVERY,
+        })
+        .where(eq(Order.id, id));
+      res.success('OKE');
     } catch (e) {
-      next(e)
+      next(e);
     }
   }
 
   async approveRejectOrder(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params
-    const { type, reason } = req.body as IReqApproveRejectOrder
-    const findOrder = await OrderRepository.findById(id)
+    const { id } = req.params;
+    const { type, reason } = req.body as IReqApproveRejectOrder;
+    const findOrder = await OrderRepository.findById(id);
     if (!findOrder) {
-      throw new NotFoundError("Order Not found")
+      throw new NotFoundError('Order Not found');
     }
     if (type === APPROVE_REJECT_ENUM.REJECT) {
       if (!reason) {
-        throw new BadRequestError("For reject reason is required")
+        throw new BadRequestError('For reject reason is required');
       }
-      await db.update(Order).set({
-        status: ORDER_STATUS_ENUM.REJECTED,
-        updatedBy: req.user.id,
-        reject_reason: reason,
-        updatedDate: new Date()
-
-      })
-        .where(eq(Order.id, id))
+      await db
+        .update(Order)
+        .set({
+          status: ORDER_STATUS_ENUM.REJECTED,
+          updatedBy: req.user.id,
+          reject_reason: reason,
+          updatedDate: new Date(),
+        })
+        .where(eq(Order.id, id));
     } else if (type === APPROVE_REJECT_ENUM.APPROVE) {
-      await db.update(Order).set({
-        status: ORDER_STATUS_ENUM.IN_PROGRESS,
-        updatedBy: req.user.id,
-        updatedDate: new Date()
-      })
-        .where(eq(Order.id, id))
+      await db
+        .update(Order)
+        .set({
+          status: ORDER_STATUS_ENUM.IN_PROGRESS,
+          updatedBy: req.user.id,
+          updatedDate: new Date(),
+        })
+        .where(eq(Order.id, id));
     } else {
-      throw new BadRequestError("Type not valid")
+      throw new BadRequestError('Type not valid');
     }
 
     try {
-      res.success("OKE")
+      res.success('OKE');
     } catch (e) {
-      next(e)
+      next(e);
     }
   }
   async uploadPaymentImage(req: Request, res: Response, next: NextFunction) {
     try {
-      const { url } = req.body
-      const { id } = req.params
-      const findOder = await OrderRepository.findById(id)
+      const { url } = req.body;
+      const { id } = req.params;
+      const findOder = await OrderRepository.findById(id);
       if (!findOder) {
-        throw new NotFoundError("Order not found")
+        throw new NotFoundError('Order not found');
       }
       if (!id) {
-        throw new BadRequestError("Id is required")
+        throw new BadRequestError('Id is required');
       }
       if (!url) {
-        throw new BadRequestError("Url is required")
+        throw new BadRequestError('Url is required');
       }
-      await db.update(Order).set({
-        payment_image_url: url,
-        status: ORDER_STATUS_ENUM.PENDING
-      }).where(eq(Order.id, id))
+      await db
+        .update(Order)
+        .set({
+          payment_image_url: url,
+          status: ORDER_STATUS_ENUM.PENDING,
+        })
+        .where(eq(Order.id, id));
 
-
-      res.success("OKE")
+      res.success('OKE');
     } catch (e) {
-      next(e)
+      next(e);
     }
   }
 
@@ -131,7 +207,11 @@ export class OrderController {
     const { page = 0, size = 10, id = '' } = req.query;
     const offset = Number(page) * Number(size);
     const limit = Number(size);
-    const data = await OrderRepository.getListOrderAdmin(offset, limit, String(id))
+    const data = await OrderRepository.getListOrderAdmin(
+      offset,
+      limit,
+      String(id),
+    );
     const responseData: IResListOrderAdmin[] = data.orders.map((e) => {
       return {
         id: e.order.id,
@@ -162,9 +242,9 @@ export class OrderController {
         page_count: Math.ceil(data.totalRecords / limit),
         size: limit,
         page: Number(page),
-      })
+      });
     } catch (e) {
-      next(e)
+      next(e);
     }
   }
 
@@ -245,7 +325,7 @@ export class OrderController {
           destination_code: order?.shippingAddress?.destinationCode,
           id: order.shippingAddress?.id,
           province: order.shippingAddress?.province,
-          subdistrict: order.shippingAddress?.subdistrict
+          subdistrict: order.shippingAddress?.subdistrict,
         },
         products: products,
       };
