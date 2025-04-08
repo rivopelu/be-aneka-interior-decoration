@@ -200,6 +200,48 @@ export class ProductController {
       next(e);
     }
   }
+  static async editProduct(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    const body = req.body as IReqCreateProduct;
+    const slug = generateSlug(body.name);
+    const id = String(req.params.id);
+    try {
+      const findProduct = await ProductRepository.findProductById(id)
+      if (!findProduct) {
+        throw new NotFoundError("Product not found")
+      }
+      const findSlug = await db
+        .select({ count: count() })
+        .from(Product)
+        .where(eq(Product.slug, slug));
+      const doesExist = findSlug[0]?.count > 0;
+      if (doesExist) {
+        throw new BadRequestError('Product Already Exists');
+      }
+      const findCategory = await db
+        .select()
+        .from(Category)
+        .where(eq(Category.id, body.category_id));
+      const category = findCategory[0];
+      if (!category) {
+        throw new BadRequestError('category not found');
+      }
+      await db.update(Product).set({
+        categoryId: category.id,
+        slug: slug,
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        image: req.body.image_url,
+      }).where(eq(Product.id, id));
+      res.success('product successfully created');
+    } catch (err) {
+      next(err);
+    }
+  }
   static async createNewProduct(
     req: Request,
     res: Response,
