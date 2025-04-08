@@ -142,6 +142,35 @@ export class ProductController {
       next(error);
     }
   }
+  static async adminDetailProduct(req: Request, res: Response, next: NextFunction) {
+    const findProduct = await db
+      .select({
+        id: Product.id,
+        slug: Product.slug,
+        description: Product.description,
+        name: Product.name,
+        price: Product.price,
+        image: Product.image,
+        category_slug: Category.slug,
+        category_id: Category.id,
+        created_date: Product.createdDate,
+        category_name: Category.name,
+        active: Product.active,
+      })
+      .from(Product)
+      .innerJoin(Category, eq(Product.categoryId, Category.id))
+      .where(eq(Product.id, req.params.id));
+    const product = findProduct[0];
+    if (!product) {
+      throw new NotFoundError('Product not found');
+    }
+
+    try {
+      res.data(product);
+    } catch (e) {
+      next(e);
+    }
+  }
   static async detailProduct(req: Request, res: Response, next: NextFunction) {
     const findProduct = await db
       .select({

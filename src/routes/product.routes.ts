@@ -14,6 +14,7 @@ router.get('/v1/category/list', ProductController.listCategory);
 
 router.post('/v1/product/new', verifyAdmin, ProductController.createNewProduct);
 router.get('/v1/product/detail/:id', ProductController.detailProduct);
+router.get('/v1/product/admin/detail/:id', verifyAdmin, ProductController.adminDetailProduct);
 router.get('/v1/product/list', ProductController.listProduct);
 router.get('/v1/product/admin/list', ProductController.AdminListProduct);
 router.delete(
