@@ -15,7 +15,7 @@ export class ProductRepository {
     const data = await db
       .select()
       .from(Product)
-      .where(and(eq(Product.id, id), eq(Product.active, true)));
+      .where(and(eq(Product.id, id)));
     return data[0];
   }
 
