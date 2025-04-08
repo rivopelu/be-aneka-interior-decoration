@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like } from 'drizzle-orm';
+import { and, count, desc, eq, like, not } from 'drizzle-orm';
 import { sql } from 'drizzle-orm/sql/sql';
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/database';
@@ -208,36 +208,43 @@ export class ProductController {
     const body = req.body as IReqCreateProduct;
     const slug = generateSlug(body.name);
     const id = String(req.params.id);
+
     try {
-      const findProduct = await ProductRepository.findProductById(id)
+      const findProduct = await ProductRepository.findProductById(id);
       if (!findProduct) {
-        throw new NotFoundError("Product not found")
+        throw new NotFoundError("Product not found");
       }
+
       const findSlug = await db
         .select({ count: count() })
         .from(Product)
-        .where(eq(Product.slug, slug));
+        .where(and(eq(Product.slug, slug), not(eq(Product.id, id))));
+
       const doesExist = findSlug[0]?.count > 0;
       if (doesExist) {
-        throw new BadRequestError('Product Already Exists');
+        throw new BadRequestError('Product with this name already exists');
       }
+
       const findCategory = await db
         .select()
         .from(Category)
         .where(eq(Category.id, body.category_id));
+
       const category = findCategory[0];
       if (!category) {
-        throw new BadRequestError('category not found');
+        throw new BadRequestError('Category not found');
       }
+
       await db.update(Product).set({
         categoryId: category.id,
         slug: slug,
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price,
-        image: req.body.image_url,
+        name: body.name,
+        description: body.description,
+        price: body.price,
+        image: body.image_url,
       }).where(eq(Product.id, id));
-      res.success('product successfully created');
+
+      res.success('Product successfully updated');
     } catch (err) {
       next(err);
     }
