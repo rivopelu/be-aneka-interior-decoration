@@ -14,7 +14,7 @@ import { ProductRepository } from '../repositories/product.repository';
 export class ProductController {
   static async archiveProduct(req: Request, res: Response, next: NextFunction) {
     const id = String(req.params.id);
-    const findProduct = await ProductRepository.findProductById(id);
+    const findProduct = await ProductRepository.findProductByIdNotFilter(id);
     if (!findProduct) {
       throw new NotFoundError('Product not found');
     }
