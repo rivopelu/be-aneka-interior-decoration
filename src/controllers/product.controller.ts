@@ -1,4 +1,4 @@
-import { and, count, desc, eq, like, not } from 'drizzle-orm';
+import { and, count, desc, eq, like, ne, not } from 'drizzle-orm';
 import { sql } from 'drizzle-orm/sql/sql';
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../db/database';
@@ -43,15 +43,16 @@ export class ProductController {
       const limit = Number(size);
 
       const conditions = [];
-      conditions.push(eq(Product.active, true));
-      if (name) conditions.push(like(Product.name, `%${name}%`));
+      if (name) {
+        conditions.push(like(Product.name, `%${name}%`));
+      }
       if (category_id)
         conditions.push(eq(Product.categoryId, String(category_id)));
 
       const totalData = await db
         .select({ count: sql<number>`COUNT(*)` })
         .from(Product)
-        .where(and(...conditions))
+        .where(and(...conditions, eq(Product.active, true)))
         .then((res) => res[0]?.count ?? 0);
 
       const products = await db
@@ -69,7 +70,7 @@ export class ProductController {
         })
         .from(Product)
         .leftJoin(Category, eq(Product.categoryId, Category.id))
-        .where(and(...conditions))
+        .where(and(...conditions, eq(Product.active, true)))
         .orderBy(desc(Product.createdDate))
         .limit(limit)
         .offset(offset);
@@ -142,7 +143,11 @@ export class ProductController {
       next(error);
     }
   }
-  static async adminDetailProduct(req: Request, res: Response, next: NextFunction) {
+  static async adminDetailProduct(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
     const findProduct = await db
       .select({
         id: Product.id,
@@ -200,11 +205,7 @@ export class ProductController {
       next(e);
     }
   }
-  static async editProduct(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) {
+  static async editProduct(req: Request, res: Response, next: NextFunction) {
     const body = req.body as IReqCreateProduct;
     const slug = generateSlug(body.name);
     const id = String(req.params.id);
@@ -212,7 +213,7 @@ export class ProductController {
     try {
       const findProduct = await ProductRepository.findProductById(id);
       if (!findProduct) {
-        throw new NotFoundError("Product not found");
+        throw new NotFoundError('Product not found');
       }
 
       const findSlug = await db
@@ -235,14 +236,17 @@ export class ProductController {
         throw new BadRequestError('Category not found');
       }
 
-      await db.update(Product).set({
-        categoryId: category.id,
-        slug: slug,
-        name: body.name,
-        description: body.description,
-        price: body.price,
-        image: body.image_url,
-      }).where(eq(Product.id, id));
+      await db
+        .update(Product)
+        .set({
+          categoryId: category.id,
+          slug: slug,
+          name: body.name,
+          description: body.description,
+          price: body.price,
+          image: body.image_url,
+        })
+        .where(eq(Product.id, id));
 
       res.success('Product successfully updated');
     } catch (err) {
@@ -284,6 +288,67 @@ export class ProductController {
       res.success('product successfully created');
     } catch (err) {
       next(err);
+    }
+  }
+
+  static async deleteCategory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const productsUsingCategory = await db
+        .select({ count: count() })
+        .from(Product)
+        .where(eq(Product.categoryId, id));
+
+      if (productsUsingCategory[0].count > 0) {
+        throw new BadRequestError(
+          'Kategory tidak bisa dihapus karena berelasi dengan product',
+        );
+      }
+
+      await db.delete(Category).where(eq(Category.id, id));
+
+      res.success('Category deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+  static async editCategory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id, name } = req.body as { id: string; name: string };
+      const slug = generateSlug(name);
+
+      const existingCategory = await db
+        .select()
+        .from(Category)
+        .where(eq(Category.id, id));
+
+      if (existingCategory.length === 0) {
+        throw new BadRequestError('Category not found');
+      }
+
+      const checkSlug = await db
+        .select({ count: count() })
+        .from(Category)
+        .where(and(eq(Category.slug, slug), ne(Category.id, id)));
+
+      if (checkSlug[0].count > 0) {
+        throw new BadRequestError('Category with this name already exists');
+      }
+
+      await db
+        .update(Category)
+        .set({
+          name,
+          slug,
+          updatedDate: new Date(),
+          updatedBy: req.user.id,
+        })
+        .where(eq(Category.id, id));
+
+      res.success('Category updated successfully');
+    } catch (e) {
+      next(e);
     }
   }
   static async createNewCategory(
